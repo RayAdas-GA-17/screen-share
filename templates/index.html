@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实时屏幕监控</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            /* padding: 20px; */
+            padding: 0px;
+            background-color: #f5f5f5;
+            max-width: 100%;
+        }
+
+        .container {
+            /* max-width: 1200px; */
+            max-width: auto;
+            /* margin: 0 auto; */
+            margin: 0;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .screenshot-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .screenshot {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .timestamp {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>实时屏幕监控</h1>
+        <div class="screenshot-container">
+            <p class="timestamp" id="timestamp">加载中...</p>
+            <img class="screenshot" id="screenshot" src="" alt="实时屏幕截图">
+        </div>
+        <div class="controls">
+            <button id="refresh-btn">立即刷新</button>
+        </div>
+    </div>
+
+    <script>
+        // 更新截图显示的函数
+        function updateScreenshot() {
+            const screenshotImg = document.getElementById('screenshot');
+            const timestampEl = document.getElementById('timestamp');
+
+            // 添加时间戳参数以避免缓存
+            const timestamp = new Date().getTime();
+            screenshotImg.src = '/latest_screenshot?t=' + timestamp;
+
+            // 更新时间戳
+            const now = new Date();
+            timestampEl.textContent = '最后更新时间: ' + now.toLocaleString();
+        }
+
+        // 页面加载时自动更新一次
+        window.addEventListener('DOMContentLoaded', updateScreenshot);
+
+        // 设置定时器，每秒更新一次
+        setInterval(updateScreenshot, 1000);
+
+        // 添加按钮点击事件
+        document.getElementById('refresh-btn').addEventListener('click', function () {
+            // 发送请求让后端立即截取屏幕
+            fetch('/capture')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('截图已更新');
+                    updateScreenshot();  // 更新截图显示
+                })
+                .catch(error => {
+                    console.error('截图更新失败:', error);
+                });
+        });
+    </script>
+</body>
+
+</html>
