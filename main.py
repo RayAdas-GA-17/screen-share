@@ -17,6 +17,7 @@ from flask import Flask, jsonify, render_template, send_file
 
 app = Flask(__name__)
 app.config["SCREENSHOT_INTERVAL"] = 10  # 每隔10秒截屏一次
+# app.config["SCREENSHOT_INTERVAL"] = 1 / 25  # FPS 25
 app.config["LATEST_SCREESHOT"] = None  # 用于存储最新的截图字节数据
 
 
@@ -32,7 +33,7 @@ def capture_screenshot():
 
     # 更新最新的截图数据
     app.config["LATEST_SCREESHOT"] = img_byte_arr
-    print(f"截图已捕获，保存在内存中: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    # print(f"截图已捕获，保存在内存中: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
 def screenshot_scheduler():

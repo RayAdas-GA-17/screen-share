@@ -9,21 +9,21 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            /* padding: 20px; */
             padding: 0px;
             background-color: #f5f5f5;
-            max-width: 100%;
         }
 
         .container {
-            /* max-width: 1200px; */
-            max-width: auto;
-            /* margin: 0 auto; */
-            margin: 0;
+            max-width: 100%;
+            margin: 0 auto;
             background-color: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            /* 初始宽度 */
+            transition: width 0.3s ease;
+            /* 平滑过渡效果 */
         }
 
         .screenshot-container {
@@ -39,8 +39,11 @@
         }
 
         .controls {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             margin-top: 20px;
+            gap: 10px;
         }
 
         .timestamp {
@@ -49,26 +52,82 @@
             font-size: 14px;
             margin-top: 10px;
         }
+
+        .scale-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .slider {
+            width: 100px;
+        }
+
+        .scale-input {
+            width: 40px;
+            text-align: center;
+        }
+
+        .control-strip {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 
 <body>
-    <div class="container">
+    <div class="container" id="container">
         <h1>实时屏幕监控</h1>
-        <div class="screenshot-container">
-            <p class="timestamp" id="timestamp">加载中...</p>
-            <img class="screenshot" id="screenshot" src="" alt="实时屏幕截图">
+        <div class="control-strip">
+            <button id="refresh-btn" class="btn">立即刷新</button>
+            <p class="timestamp" id="timestamp">最后更新时间: </p>
+            <input type="range" id="scale-slider" class="slider" min="20" max="100" value="80">
+            <span>%</span>
+            <input type="number" id="scale-input" class="scale-input" min="20" max="100" value="80">
         </div>
-        <div class="controls">
-            <button id="refresh-btn">立即刷新</button>
+        <div class="screenshot-container">
+            <img class="screenshot" id="screenshot" src="" alt="实时屏幕截图">
         </div>
     </div>
 
     <script>
+        let scale = 80; // 初始缩放比例
+        const container = document.getElementById('container');
+        const scaleSlider = document.getElementById('scale-slider');
+        const scaleInput = document.getElementById('scale-input');
+        const timestampEl = document.getElementById('timestamp');
+
+        // 更新缩放显示和容器宽度
+        function updateScale() {
+            scale = parseInt(scaleSlider.value);
+            scaleInput.value = scale;
+            container.style.width = `${scale}%`;
+        }
+
+        // 监听滑块的变化
+        scaleSlider.addEventListener('input', updateScale);
+
+        // 监听输入框的变化
+        scaleInput.addEventListener('change', function () {
+            scale = parseInt(this.value);
+            if (scale < 20) scale = 20;
+            if (scale > 100) scale = 100;
+            scaleSlider.value = scale;
+            updateScale();
+        });
+
         // 更新截图显示的函数
         function updateScreenshot() {
             const screenshotImg = document.getElementById('screenshot');
-            const timestampEl = document.getElementById('timestamp');
 
             // 添加时间戳参数以避免缓存
             const timestamp = new Date().getTime();
@@ -84,6 +143,8 @@
 
         // 设置定时器，每秒更新一次
         setInterval(updateScreenshot, 1000);
+        // // 设置定时器，FPS 25
+        // setInterval(updateScreenshot, 1000/25);
 
         // 添加按钮点击事件
         document.getElementById('refresh-btn').addEventListener('click', function () {
