@@ -16,20 +16,32 @@ import pyautogui
 from flask import Flask, jsonify, render_template, send_file
 
 app = Flask(__name__)
-app.config["SCREENSHOT_INTERVAL"] = 10  # 每隔10秒截屏一次
+app.config["SCREENSHOT_INTERVAL"] = 1  # 每隔1秒截屏一次
 # app.config["SCREENSHOT_INTERVAL"] = 1 / 25  # FPS 25
 app.config["LATEST_SCREESHOT"] = None  # 用于存储最新的截图字节数据
 
 
+# 创建一个可复用的BytesIO缓冲区
+screenshot_buffer = io.BytesIO()
+
+
 def capture_screenshot():
     """截取屏幕并返回图像字节数据"""
+    global screenshot_buffer  # 使用全局变量来复用缓冲区
+
     # 截取屏幕
     screenshot = pyautogui.screenshot()
 
-    # 将图像保存到BytesIO对象（内存中的文件流）
-    img_byte_arr = io.BytesIO()
-    screenshot.save(img_byte_arr, format="PNG")
-    img_byte_arr = img_byte_arr.getvalue()
+    # 将图像保存到复用的BytesIO缓冲区
+    # 首先清空缓冲区
+    screenshot_buffer.seek(0)
+    screenshot_buffer.truncate(0)
+
+    # 保存图像到缓冲区
+    screenshot.save(screenshot_buffer, format="PNG")
+
+    # 获取缓冲区中的字节数据
+    img_byte_arr = screenshot_buffer.getvalue()
 
     # 更新最新的截图数据
     app.config["LATEST_SCREESHOT"] = img_byte_arr
@@ -71,4 +83,5 @@ if __name__ == "__main__":
     screenshot_thread.start()
 
     # 启动Flask应用
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)
